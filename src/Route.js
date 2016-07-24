@@ -1,8 +1,20 @@
 'use strict';
+const parseRule = require('./parseRule');
+const convert = require('./unitConverter');
 
 class Route {
-    constructor(segments) {
-        this.segments = segments;
+    constructor(segments, options) {
+        options = options || {};
+        // Make a deep copy
+        this.segments = segments.map(segment => {
+            return {
+                distance: segment.distance,
+                duration: segment.duration,
+                elevation: segment.elevation
+            };
+        });
+        this._timeUnit = options.timeUnit || 'hour';
+        this._distanceUnit = options.distanceUnit || 'kilometer';
     }
 
     get distance() {
@@ -18,58 +30,91 @@ class Route {
     }
 
     get speed() {
-        if(!this._speed)
+        if (!this._speed)
             this._compute();
         return this._speed;
     }
 
     get meanSpeed() {
-        if(!this._meanSpeed)
+        if (!this._meanSpeed)
             this._compute();
         return this._meanSpeed;
     }
 
     get meanPace() {
-        if(!this._meanPace)
+        if (!this._meanPace)
             this._compute();
         return this._meanPace;
     }
 
     get totalDuration() {
-        if(!this._totalDuration) this._compute();
+        if (!this._totalDuration) this._compute();
         return this._totalDuration;
     }
 
     get totalDistance() {
-        if(!this._totalDistance) this._compute();
+        if (!this._totalDistance) this._compute();
         return this._totalDistance;
     }
 
     get totalElevation() {
-        if(!this._totalElevation) this._compute();
+        if (!this._totalElevation) this._compute();
         return this._totalElevation;
     }
 
     get cumulDuration() {
-        if(!this._cumulDuration) this._compute();
+        if (!this._cumulDuration) this._compute();
         return this._cumulDuration;
     }
 
     get cumulDistance() {
-        if(!this._cumulDistance) this._compute();
+        if (!this._cumulDistance) this._compute();
         return this._cumulDistance;
     }
 
     get cumulElevation() {
-        if(!this._cumulElevation) this._compute();
+        if (!this._cumulElevation) this._compute();
         return this._cumulElevation;
     }
 
     split(splitRule) {
+        var parsedRule = parsedRule(splitRule);
+    }
+
+    setUnits(distanceUnit, timeUnit) {
+        var hasChanged = false, distanceUnitChanged = false, timeUnitChanged = false;
+        if (distanceUnit && distanceUnit !== this._distanceUnit) {
+            hasChanged = true;
+            distanceUnitChanged = true;
+        }
+        if (timeUnit && this._timeUnit !== timeUnit) {
+            hasChanged = true;
+            timeUnitChanged = true;
+        }
+        if (!hasChanged) return;
+        if (distanceUnitChanged) {
+            for (var i = 0; i < this.segments.length; i++) {
+                this.segments[i].distance = convert(this.segments[i].distance + this._distanceUnit, distanceUnit);
+                this.segments[i].elevation = convert(this.segments[i].elevation + this._distanceUnit, distanceUnit);
+            }
+            this._distanceUnit = distanceUnit;
+        }
+        if (timeUnitChanged) {
+            for (i = 0; i < this.segments.length; i++) {
+                this.segments[i].duration = convert(this.segments[i].duration + this._timeUnit, timeUnit);
+            }
+            this._timeUnit = timeUnit;
+        }
+
+        if(hasChanged && this._computeCalled) {
+            console.log('compute');
+            this._compute();
+        }
 
     }
 
     _compute() {
+        this._computeCalled = true;
         this._cumulDistance = new Array(this.segments.length);
         this._cumulDuration = new Array(this.segments.length);
         this._cumulElevation = new Array(this.segments.length);
@@ -80,7 +125,7 @@ class Route {
         this._speed = new Array(this.segments.length);
         var cumSpeed = 0;
 
-        for(var i=0; i<this.segments.length; i++) {
+        for (var i = 0; i < this.segments.length; i++) {
             var segment = this.segments[i];
             this._speed[i] = segment.distance / segment.duration;
             this._totalDuration += segment.duration;
