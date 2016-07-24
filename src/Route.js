@@ -1,6 +1,6 @@
 'use strict';
 const parseRule = require('./parseRule');
-const convert = require('./unitConverter');
+const converter = require('./unitConverter');
 
 class Route {
     constructor(segments, options) {
@@ -78,7 +78,74 @@ class Route {
     }
 
     split(splitRule) {
-        var parsedRule = parsedRule(splitRule);
+        throw new Error('not implemented');
+        function getNextIdx(type, idx, val) {
+            var measures, remainder;
+            if(val === '*') return distances.length -1;
+            if(type === 'distance') {
+                measures = distances;
+                remainder = remainderD;
+            }
+            else {
+                measures = times;
+                remainder = remainderT;
+            }
+            var i = idx;
+            var comp = val - remainder;
+            var remainderD = 0;
+            var remainderT = 0;
+            while(i<measures.length) {
+                if(comp < measures[i] - measures[idx]) {
+                    var f = (measures[i] - measures[i-1]) / (measures[i] - measures[idx] - val + remainder);
+                    if(type === 'distance') {
+                        remainderD = distances[i] - distances[idx] - val + remainder;
+                        remainderT = (times[i] - times[i-1]) / f;
+                    } else {
+                        remainderT = times[i] - times[idx] - val + remainder;
+                        remainderD = (distances[i] - distances[i-1]) / f;
+                    }
+                    break;
+                }
+                i++;
+            }
+            return i;
+        }
+
+        function getNextAutoIdx(thresholds, from, to) {
+            var condition = getAutoCondition(thresholds, speeds[from]);
+            var c = condition(smoothSpeeds[from]);
+            ++from;
+            while(c === condition(smoothSpeeds[from]) && from <= to) {
+                ++from;
+            }
+            return from;
+        }
+
+        var series = parsedRule(splitRule);
+        var parts = [];
+
+        for(var j=0; j<series.length; j++) {
+            var idx = 0;
+            var serie = parseSerie(series[j]);
+            if(serie[0] && serie[0].auto) {
+                serie = serie[0];
+                var from = idx;
+                var to = getNextIdx(serie, idx, serie.value);
+                while(from < distances.length -1) {
+                    var f = from;
+                    from = getNextAutoIdx(serie.thresholds, from, to);
+                    parts.push({from: f, to: from});
+                }
+
+            } else {
+                for(var i=0; i<serie.length; i++) {
+                    from = idx;
+                    idx = getNextIdx(serie[i].type, idx, serie[i].value)
+                    parts.push({from, to: idx});
+                }
+            }
+
+        }
     }
 
     setUnits(distanceUnit, timeUnit) {
@@ -94,14 +161,14 @@ class Route {
         if (!hasChanged) return;
         if (distanceUnitChanged) {
             for (var i = 0; i < this.segments.length; i++) {
-                this.segments[i].distance = convert(this.segments[i].distance + this._distanceUnit, distanceUnit);
-                this.segments[i].elevation = convert(this.segments[i].elevation + this._distanceUnit, distanceUnit);
+                this.segments[i].distance = converter.convert(this.segments[i].distance + this._distanceUnit, distanceUnit);
+                this.segments[i].elevation = converter.convert(this.segments[i].elevation + this._distanceUnit, distanceUnit);
             }
             this._distanceUnit = distanceUnit;
         }
         if (timeUnitChanged) {
             for (i = 0; i < this.segments.length; i++) {
-                this.segments[i].duration = convert(this.segments[i].duration + this._timeUnit, timeUnit);
+                this.segments[i].duration = converter.convert(this.segments[i].duration + this._timeUnit, timeUnit);
             }
             this._timeUnit = timeUnit;
         }

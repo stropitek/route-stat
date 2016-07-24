@@ -1,5 +1,7 @@
 'use strict';
 
+const converter = require('./unitConverter');
+
 function parseRule(rule) {
     rule = rule.trim();
     var r = [];
@@ -30,53 +32,17 @@ function parseRule(rule) {
 
 
 function parseElement(element) {
-    var m = /^([\d\.]*)(s|min|h|sec|m|km|\*)$/.exec(element);
+    var m = /^([^\{]+)(\{.*\})?$/.exec(element);
     if(!m) {
         throw new Error('Invalid expression');
     }
-
-    if(!m[1]) m[1] = 1;
-    var r = {};
-    switch(m[2]) {
-        case 'min': case 's': case 'h': case 'sec':
-            r.type = 'duration';
-            break;
-        case 'm': case'km':
-            r.type = 'distance';
-            break;
-        case '*':
-            r.type = 'joker';
-            break;
-        default:
-            throw new Error('Unreachable, please write an issue on github :-(');
-    }
-
-    switch(m[2]) {
-        case 's': case 'sec':
-            r.value = +m[1];
-            r.unit = 'second';
-            break;
-        case 'km':
-            r.value = +m[1];
-            r.unit = 'kilometer';
-            break;
-        case 'min':
-            r.value = +m[1];
-            r.unit = 'minute';
-            break;
-        case 'h':
-            r.value = +m[1];
-            r.unit = 'hour';
-            break;
-        case 'm':
-            r.value = +m[1];
-            r.unit = 'meter';
-            break;
-        case '*':
-            r.value = '*';
-            break;
-        default:
-            throw new Error('Unreachable, please write an issue on github :-(');
+    if(m[1] === '*') {
+        var r = {
+            type: 'joker',
+            value: '*'
+        };
+    } else {
+        r = converter.parse(m[1]);
     }
     return r;
 }

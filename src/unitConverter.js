@@ -1,8 +1,10 @@
 'use strict';
+const expressionReg =/^([\d\.]*)(.+)$/;
+
 const units = [
     {type: 'distance', name: 'meter', alias: ['m', 'meters'], value: 1},
     {type: 'distance', name: 'kilometer', alias: ['km', 'kilometers'], value: 1000},
-    {type: 'duration', name: 'second', alias: ['seconds', 's'], value: 1},
+    {type: 'duration', name: 'second', alias: ['seconds', 's', 'sec'], value: 1},
     {type: 'duration', name: 'minute', alias: ['min', 'minutes'], value: 60},
     {type: 'duration', name: 'hour', alias: ['h', 'hours'], value: 3600}
 ];
@@ -22,11 +24,35 @@ var unitMap = {};
     }
 })();
 
+function getType(expression) {
+    var parsed = parse(expression);
+    return parsed.type;
+
+}
+
+function parse(expression) {
+    var m = expressionReg.exec(expression);
+    if(!m) {
+        throw new Error('Invalid expression');
+    }
+    var unit = unitMap[m[2]];
+    if(!unit) {
+        throw new Error('Invalid unit');
+    }
+
+    if(!m[1]) m[1] = 1;
+
+    return {
+        type: unit.type,
+        unit: unit.name,
+        value: +m[1]
+    };
+}
 
 function convert(source, targetUnit) {
     source = source.trim();
     targetUnit = targetUnit.trim();
-    var sourceM = /^([\d\.]*)(.+)$/.exec(source);
+    var sourceM = expressionReg.exec(source);
     if(!sourceM) {
         throw new Error('Invalid source expression');
     }
@@ -47,4 +73,4 @@ function convert(source, targetUnit) {
     return sourceValue * sourceUnit.value / targetUnit.value;
 }
 
-module.exports = convert;
+module.exports = {convert, getType, parse};

@@ -117,17 +117,30 @@ describe('Parse rule: valid usage of joker', function () {
     });
 });
 
+describe('threshold based split rules', function () {
+    it('threshold based rule', function () {
+        parseRule('*{cumulDistance, 5km, 10km, 15km}').should.deepEqual([
+            {
+                type: 'joker',
+                thresholds:{
+                    property: 'cumulDistance',
+                    stops: ['5km']
+                }}
+        ])
+    });
+});
+
 describe('Parse rule: errors', function () {
     it('no units', function () {
         (function () {
             parseRule('1');
-        }).should.throw(/Invalid expression/);
+        }).should.throw(/Invalid unit/);
     });
 
     it('invalid unit', function () {
         (function () {
             parseRule('12aaa');
-        }).should.throw(/Invalid expression/);
+        }).should.throw(/Invalid unit/);
     });
 
     it('invalid repetition', function () {
