@@ -119,14 +119,18 @@ describe('Parse rule: valid usage of joker', function () {
 
 describe('threshold based split rules', function () {
     it('threshold based rule', function () {
-        parseRule('*{cumulDistance, 5km, 10km, 15km}').should.deepEqual([
+        parseRule('*{cumulDistance, 5km, 10km}').should.deepEqual([
             {
                 type: 'joker',
-                thresholds:{
+                value: '*',
+                thresholds: {
                     property: 'cumulDistance',
-                    stops: ['5km']
+                    stops: [
+                        {type: 'distance', unit: 'kilometer', value: 5},
+                        {type: 'distance', unit: 'kilometer', value: 10}
+                    ]
                 }}
-        ])
+        ]);
     });
 });
 

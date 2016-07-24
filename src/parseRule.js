@@ -1,6 +1,7 @@
 'use strict';
 
 const converter = require('./unitConverter');
+const constant = require('./constant');
 
 function parseRule(rule) {
     rule = rule.trim();
@@ -32,7 +33,7 @@ function parseRule(rule) {
 
 
 function parseElement(element) {
-    var m = /^([^\{]+)(\{.*\})?$/.exec(element);
+    var m = /^([^\{]+)(\{(.*)\})?$/.exec(element);
     if(!m) {
         throw new Error('Invalid expression');
     }
@@ -43,6 +44,26 @@ function parseElement(element) {
         };
     } else {
         r = converter.parse(m[1]);
+    }
+    if(m[3]) {
+        var thresholds = m[3].split(',');
+        if(thresholds.length < 2) throw new Error('Invalid threshold rule');
+        var property = thresholds[0];
+        console.log(property);
+        thresholds.splice(0,1);
+        var expectedType = constant.properties[property];
+        if(!expectedType) throw new Error('Unexpected threshold property');
+        for(var i=0; i<thresholds.length; i++) {
+            console.log(thresholds[i]);
+            thresholds[i] = converter.parse(thresholds[i]);
+            if(thresholds[i].type !== expectedType) {
+                throw new Error('Unexpected type in thresholds');
+            }
+        }
+        r.thresholds = {
+            property,
+            stops: thresholds
+        };
     }
     return r;
 }

@@ -31,12 +31,14 @@ function getType(expression) {
 }
 
 function parse(expression) {
+    expression = expression.trim();
     var m = expressionReg.exec(expression);
     if(!m) {
         throw new Error('Invalid expression');
     }
     var unit = unitMap[m[2]];
     if(!unit) {
+        console.log(m[2]);
         throw new Error('Invalid unit');
     }
 
