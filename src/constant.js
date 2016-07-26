@@ -1,12 +1,12 @@
 'use strict';
 
 const properties = {
-    cumulDistance: 'distance',
-    cumulDuration: 'duration',
-    distance: 'distance',
-    duration: 'duration',
-    elevation: 'distance',
-    cumulElevation: 'distance',
+    cumulDistance: 'length',
+    cumulDuration: 'time',
+    distance: 'length',
+    duration: 'time',
+    elevation: 'length',
+    cumulElevation: 'length',
     speed: 'speed'
 };
 

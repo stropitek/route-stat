@@ -13,8 +13,8 @@ class Route {
                 elevation: segment.elevation
             };
         });
-        this._timeUnit = options.timeUnit || 'hour';
-        this._distanceUnit = options.distanceUnit || 'kilometer';
+        this._timeUnit = options.timeUnit || 'h';
+        this._distanceUnit = options.distanceUnit || 'km';
     }
 
     get distance() {

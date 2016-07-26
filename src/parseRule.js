@@ -43,10 +43,14 @@ function parseElement(element) {
             value: '*'
         };
     } else {
-        r = converter.parse(m[1]);
+        r = {
+            type: converter.getType(m[1]),
+            value: m[1]
+        };
+        if(r.type !== 'time' && r.type !== 'length') throw new Error('Invalid type');
     }
     if(m[3]) {
-        var thresholds = m[3].split(',');
+        var thresholds = m[3].split(',').map(s => s.trim());
         if(thresholds.length < 2) throw new Error('Invalid threshold rule');
         var property = thresholds[0];
         console.log(property);
@@ -55,7 +59,11 @@ function parseElement(element) {
         if(!expectedType) throw new Error('Unexpected threshold property');
         for(var i=0; i<thresholds.length; i++) {
             console.log(thresholds[i]);
-            thresholds[i] = converter.parse(thresholds[i]);
+            thresholds[i] = {
+                type: converter.getType(thresholds[i]),
+                value: thresholds[i]
+            };
+
             if(thresholds[i].type !== expectedType) {
                 throw new Error('Unexpected type in thresholds');
             }
