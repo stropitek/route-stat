@@ -147,6 +147,12 @@ describe('Parse rule: errors', function () {
         }).should.throw(/Invalid unit/);
     });
 
+    it('invalid unit type', function () {
+        (function () {
+            parseRule('12km/h');
+        }).should.throw(/Invalid unit type/);
+    });
+
     it('invalid repetition', function () {
         (function () {
             parseRule('[1min, 1km');

@@ -47,7 +47,7 @@ function parseElement(element) {
             type: converter.getType(m[1]),
             value: m[1]
         };
-        if(r.type !== 'time' && r.type !== 'length') throw new Error('Invalid type');
+        if(r.type !== 'time' && r.type !== 'length') throw new Error('Invalid unit type');
     }
     if(m[3]) {
         var thresholds = m[3].split(',').map(s => s.trim());

@@ -78,11 +78,10 @@ class Route {
     }
 
     split(splitRule) {
-        throw new Error('not implemented');
         function getNextIdx(type, idx, val) {
             var measures, remainder;
-            if(val === '*') return distances.length -1;
-            if(type === 'distance') {
+            if (val === '*') return distances.length - 1;
+            if (type === 'distance') {
                 measures = distances;
                 remainder = remainderD;
             }
@@ -94,15 +93,15 @@ class Route {
             var comp = val - remainder;
             var remainderD = 0;
             var remainderT = 0;
-            while(i<measures.length) {
-                if(comp < measures[i] - measures[idx]) {
-                    var f = (measures[i] - measures[i-1]) / (measures[i] - measures[idx] - val + remainder);
-                    if(type === 'distance') {
+            while (i < measures.length) {
+                if (comp < measures[i] - measures[idx]) {
+                    var f = (measures[i] - measures[i - 1]) / (measures[i] - measures[idx] - val + remainder);
+                    if (type === 'distance') {
                         remainderD = distances[i] - distances[idx] - val + remainder;
-                        remainderT = (times[i] - times[i-1]) / f;
+                        remainderT = (times[i] - times[i - 1]) / f;
                     } else {
                         remainderT = times[i] - times[idx] - val + remainder;
-                        remainderD = (distances[i] - distances[i-1]) / f;
+                        remainderD = (distances[i] - distances[i - 1]) / f;
                     }
                     break;
                 }
@@ -115,36 +114,21 @@ class Route {
             var condition = getAutoCondition(thresholds, speeds[from]);
             var c = condition(smoothSpeeds[from]);
             ++from;
-            while(c === condition(smoothSpeeds[from]) && from <= to) {
+            while (c === condition(smoothSpeeds[from]) && from <= to) {
                 ++from;
             }
             return from;
         }
 
-        var series = parsedRule(splitRule);
+        var serie = parseRule(splitRule);
         var parts = [];
 
-        for(var j=0; j<series.length; j++) {
-            var idx = 0;
-            var serie = parseSerie(series[j]);
-            if(serie[0] && serie[0].auto) {
-                serie = serie[0];
-                var from = idx;
-                var to = getNextIdx(serie, idx, serie.value);
-                while(from < distances.length -1) {
-                    var f = from;
-                    from = getNextAutoIdx(serie.thresholds, from, to);
-                    parts.push({from: f, to: from});
-                }
+        var idx = 0;
 
-            } else {
-                for(var i=0; i<serie.length; i++) {
-                    from = idx;
-                    idx = getNextIdx(serie[i].type, idx, serie[i].value)
-                    parts.push({from, to: idx});
-                }
-            }
-
+        for (var i = 0; i < serie.length; i++) {
+            var from = idx;
+            idx = getNextIdx(serie[i].type, idx, serie[i].value);
+            parts.push({from, to: idx});
         }
     }
 
@@ -173,7 +157,7 @@ class Route {
             this._timeUnit = timeUnit;
         }
 
-        if(hasChanged && this._computeCalled) {
+        if (hasChanged && this._computeCalled) {
             console.log('compute');
             this._compute();
         }
