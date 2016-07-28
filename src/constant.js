@@ -10,4 +10,12 @@ const properties = {
     speed: 'speed'
 };
 
-module.exports = {properties};
+const validIntervalProperties = ['distance', 'duration', 'elevation'];
+const defaultIntervalProperties = {
+    length: 'cumulDistance',
+    time: 'cumulDuration'
+};
+const validThresholdProperties = ['speed']; // TODO: add elevation speed
+
+
+module.exports = {properties, validIntervalProperties, defaultIntervalProperties, validThresholdProperties};
