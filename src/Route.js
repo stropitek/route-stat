@@ -78,25 +78,31 @@ class Route {
     }
 
     split(splitRule) {
+        var that = this;
+        var distances = this.cumulDistance;
+        var times = this.cumulDuration;
+        var remainderD = 0;
+        var remainderT = 0;
         function getNextIdx(type, idx, val) {
             var measures, remainder;
-            if (val === '*') return distances.length - 1;
-            if (type === 'distance') {
+            if (type === 'joker' && val === '*') return distances.length - 1;
+            if (type === 'length') {
+                val = converter.convert(val, that._distanceUnit);
                 measures = distances;
                 remainder = remainderD;
             }
             else {
+                val = converter.convert(val, that._timeUnit);
                 measures = times;
                 remainder = remainderT;
             }
             var i = idx;
             var comp = val - remainder;
-            var remainderD = 0;
-            var remainderT = 0;
-            while (i < measures.length) {
-                if (comp < measures[i] - measures[idx]) {
+
+            while (i < measures.length - 1) {
+                if (comp <= measures[i] - measures[idx]) {
                     var f = (measures[i] - measures[i - 1]) / (measures[i] - measures[idx] - val + remainder);
-                    if (type === 'distance') {
+                    if (type === 'length') {
                         remainderD = distances[i] - distances[idx] - val + remainder;
                         remainderT = (times[i] - times[i - 1]) / f;
                     } else {
@@ -130,6 +136,16 @@ class Route {
             idx = getNextIdx(serie[i].type, idx, serie[i].value);
             parts.push({from, to: idx});
         }
+
+        var split = new Array(parts.length);
+        for (var i = 0; i < parts.length; i++) {
+            split[i] = Route.fromSegments(this.segments.slice(parts[i].from, parts[i].to), {
+                timeUnit: that._timeUnit,
+                distanceUnit: that._distanceUnit
+            });
+        }
+        console.log(split);
+        return split;
     }
 
     setUnits(distanceUnit, timeUnit) {
@@ -190,6 +206,9 @@ class Route {
 
         this._meanSpeed = cumSpeed / this.segments.length;
         this._meanPace = 60 / this._meanSpeed;
+        this._cumulDistance.unshift(0);
+        this._cumulDuration.unshift(0);
+        this._cumulElevation.unshift(0);
 
     }
 
@@ -197,8 +216,8 @@ class Route {
         throw new Error('not yet implemented');
     }
 
-    static fromSegments(segments) {
-        return new Route(segments);
+    static fromSegments(segments, options) {
+        return new Route(segments, options);
     }
 
     static fromRule(rule) {
