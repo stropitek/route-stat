@@ -1,0 +1,38 @@
+{
+  "name": "route-stat",
+  "version": "0.0.1",
+  "description": "Statistics on gps-tracked routes",
+  "main": "src/Route.js",
+  "scripts": {
+    "test": "mocha --require should --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stropitek/route-stat.git"
+  },
+  "keywords": [
+    "gps",
+    "gpx",
+    "track",
+    "route",
+    "statistic",
+    "stat",
+    "distance",
+    "speed",
+    "elevation"
+  ],
+  "author": "Daniel Kostro <kostro.d@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stropitek/route-stat/issues"
+  },
+  "homepage": "https://github.com/stropitek/route-stat#readme",
+  "dependencies": {
+    "gpx-parse": "^0.10.4"
+  },
+  "devDependencies": {
+    "mocha": "^2.5.3",
+    "mocha-better-spec-reporter": "^3.0.2",
+    "should": "^10.0.0"
+  }
+}
