@@ -25,8 +25,8 @@ function parseRule(rule) {
 
     if(jokers.length > 1) {
         throw new Error('Invalid joker usage. Jokers can only appear once');
-    } else if(jokers.length === 1 && jokers[0].index !== 0 && jokers[0].index !== r.length-1) {
-        throw new Error('Invalid joker usage. Jokers must appear at the beginning or at the end of the split rule');
+    } else if(jokers.length === 1 && jokers[0].index !== r.length-1) {
+        throw new Error('Invalid joker usage. Jokers must appear at the end of the split rule');
     }
     return r;
 }

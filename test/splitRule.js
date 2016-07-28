@@ -100,14 +100,6 @@ describe('Parse rule: valid usage of joker', function () {
         ]);
     });
 
-    it('joker at the beginning', function () {
-        parseRule('*+min+km').should.deepEqual([
-            {type: 'joker', value: '*'},
-            {type: 'time', value: 'min'},
-            {type: 'length', value: 'km'}
-        ]);
-    });
-
     it('joker at the end', function () {
          parseRule('m+min+*').should.deepEqual([
              {type: 'length', value: 'm'},
@@ -157,6 +149,12 @@ describe('Parse rule: errors', function () {
         (function () {
             parseRule('[1min, 1km');
         }).should.throw(/Invalid expression/);
+    });
+
+    it('joker at the beginning', function () {
+        (function () {
+            parseRule('*+min+km');
+        }).should.throw(/Invalid joker usage/);
     });
 
     it('joker not at the end or the beginning', function () {
