@@ -144,7 +144,6 @@ class Route {
                 distanceUnit: that._distanceUnit
             });
         }
-        console.log(split);
         return split;
     }
 
@@ -174,7 +173,6 @@ class Route {
         }
 
         if (hasChanged && this._computeCalled) {
-            console.log('compute');
             this._compute();
         }
 
