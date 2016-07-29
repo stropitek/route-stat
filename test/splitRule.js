@@ -135,6 +135,17 @@ describe('threshold based split rules', function () {
                 ]
             }
         ]);
+
+        parseRule('5km+1km@elevation{speed, 5km/h, 7.5km/h}').should.deepEqual([
+            {type: 'length', property: 'cumulDistance', value: '5km'},
+            {
+                type: 'length', property: 'cumulElevation', value: '1km',
+                thresholds: [
+                    {type: 'speed', value: '5km/h', property: 'speed'},
+                    {type: 'speed', value: '7.5km/h', property: 'speed'}
+                ]
+            }
+        ])
     });
 });
 

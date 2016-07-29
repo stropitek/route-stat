@@ -15,6 +15,8 @@ class Route {
         });
         this._timeUnit = options.timeUnit || 'h';
         this._distanceUnit = options.distanceUnit || 'km';
+        this._speedUnit = this._distanceUnit + '/' + this._timeUnit;
+        this._paceUnit = this._timeUnit + '/' + this._distanceUnit;
     }
 
     get distance() {
@@ -82,7 +84,6 @@ class Route {
         var distances = this.cumulDistance;
         var times = this.cumulDuration;
         var elevations = this.cumulElevation;
-        console.log(elevations);
         var remainderD = 0;
         var remainderT = 0;
         var remainderE = 0;
@@ -128,11 +129,17 @@ class Route {
             return i;
         }
 
-        function getNextAutoIdx(thresholds, from, to) {
-            var condition = getAutoCondition(thresholds, speeds[from]);
-            var c = condition(smoothSpeeds[from]);
+        function getNextAutoIdx(route, thresholds, from) {
+            var to = route.segments.length - 1;
+            var property = thresholds[0].property;
+            var unitProperty = '_' + thresholds[0].type + 'Unit';
+            // convert thresholds to matching units
+            for(var i=0; i<thresholds.length; i++) {
+                thresholds[i].value = converter.convert(thresholds[i].value, route[unitProperty]);
+            }
+            var condition = getAutoCondition(thresholds.map(t => t.value), route[property][from]);
             ++from;
-            while (c === condition(smoothSpeeds[from]) && from <= to) {
+            while (condition(route[property][from]) && from <= to) {
                 ++from;
             }
             return from;
@@ -141,10 +148,9 @@ class Route {
         var serie = parseRule(splitRule);
         var parts = [];
 
-        var idx = 0;
-
+        var idx = 0, from;
         for (var i = 0; i < serie.length; i++) {
-            var from = idx;
+            from = idx;
             idx = getNextIdx(serie[i].type, serie[i].property, idx, serie[i].value);
             parts.push({from, to: idx});
         }
@@ -155,8 +161,26 @@ class Route {
                 timeUnit: that._timeUnit,
                 distanceUnit: that._distanceUnit
             });
+
+            if(serie[i].thresholds) {
+                var fromTo = [];
+                from = 0;
+                while(from < split[i].cumulDistance.length -1) {
+                    var thresholds = serie[i].thresholds.slice().map(obj => Object.assign({}, obj));
+                    var f = from;
+                    from = getNextAutoIdx(split[i], thresholds, from);
+                    fromTo.push({from: f, to: from});
+                }
+                var subsplit = new Array(fromTo.length);
+                for(var j=0; j<fromTo.length; j++) {
+                    subsplit[j] = Route.fromSegments(split[i].segments.slice(fromTo[j].from, fromTo[j].to));
+                }
+                split[i] = subsplit;
+            }
         }
-        return split;
+
+
+        return flatten(split);
     }
 
     setUnits(distanceUnit, timeUnit) {
@@ -233,6 +257,33 @@ class Route {
     static fromRule(rule) {
         throw new Error('not yet implemented');
     }
+}
+
+function getAutoCondition(thresholds, value) {
+    thresholds = thresholds.slice();
+    thresholds.unshift(Number.MIN_SAFE_INTEGER);
+    thresholds.push(Number.MAX_SAFE_INTEGER);
+    for(var i=0; i<thresholds.length-1; i++) {
+        if(value > thresholds[i] && value <= thresholds[i+1]) {
+            return function(val) {
+                return val > thresholds[i] && val <= thresholds[i+1];
+            };
+        }
+    }
+}
+
+function flatten(arr) {
+    var res = [];
+    for(var i=0; i<arr.length; i++) {
+        if(Array.isArray(arr[i])) {
+            for(var j=0; j<arr[i].length; j++) {
+                res.push(arr[i][j]);
+            }
+        } else {
+            res.push(arr[i]);
+        }
+    }
+    return res;
 }
 
 module.exports = Route;

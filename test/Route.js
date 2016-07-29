@@ -153,4 +153,11 @@ describe('route-stat split', function () {
         split.should.have.length(3);
         split.map(s => s.segments.length).should.eql([1,1,1]);
     });
+
+    it('threshold split rule', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('*{speed,1.99km/h}');
+        split.should.have.length(3);
+        split.map(s => s.segments.length).should.eql([1,1,2]);
+    });
 });
