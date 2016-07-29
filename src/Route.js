@@ -81,20 +81,26 @@ class Route {
         var that = this;
         var distances = this.cumulDistance;
         var times = this.cumulDuration;
+        var elevations = this.cumulElevation;
+        console.log(elevations);
         var remainderD = 0;
         var remainderT = 0;
-        function getNextIdx(type, idx, val) {
+        var remainderE = 0;
+        function getNextIdx(type, property, idx, val) {
             var measures, remainder;
             if (type === 'joker' && val === '*') return distances.length - 1;
-            if (type === 'length') {
+            if (property === 'cumulDistance') {
                 val = converter.convert(val, that._distanceUnit);
                 measures = distances;
                 remainder = remainderD;
-            }
-            else {
+            } else if(property === 'cumulDuration') {
                 val = converter.convert(val, that._timeUnit);
                 measures = times;
                 remainder = remainderT;
+            } else if(property === 'cumulElevation') {
+                val = converter.convert(val, that._distanceUnit);
+                measures = elevations;
+                remainder = remainderE;
             }
             var i = idx;
             var comp = val - remainder;
@@ -102,11 +108,17 @@ class Route {
             while (i < measures.length - 1) {
                 if (comp <= measures[i] - measures[idx]) {
                     var f = (measures[i] - measures[i - 1]) / (measures[i] - measures[idx] - val + remainder);
-                    if (type === 'length') {
+                    if (property === 'cumulDistance') {
                         remainderD = distances[i] - distances[idx] - val + remainder;
                         remainderT = (times[i] - times[i - 1]) / f;
-                    } else {
+                        remainderE = (elevations[i] - elevations[i - 1]) / f;
+                    } else if(property === 'cumulDuration') {
                         remainderT = times[i] - times[idx] - val + remainder;
+                        remainderD = (distances[i] - distances[i - 1]) / f;
+                        remainderE = (elevations[i] - elevations[i - 1]) / f;
+                    } else {
+                        remainderE = elevations[i] - elevations[idx] - val + remainder;
+                        remainderT = (times[i] - times[i - 1]) / f;
                         remainderD = (distances[i] - distances[i - 1]) / f;
                     }
                     break;
@@ -133,7 +145,7 @@ class Route {
 
         for (var i = 0; i < serie.length; i++) {
             var from = idx;
-            idx = getNextIdx(serie[i].type, idx, serie[i].value);
+            idx = getNextIdx(serie[i].type, serie[i].property, idx, serie[i].value);
             parts.push({from, to: idx});
         }
 

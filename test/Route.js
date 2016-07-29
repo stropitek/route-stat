@@ -33,7 +33,7 @@ var segmentsRemainder = [
     {
         distance: 3,
         duration: 1,
-        elevation: 0
+        elevation: 2
     }
 ];
 var route;
@@ -125,5 +125,32 @@ describe('route-stat split', function () {
         split = route.split('8km+11.1km+3km');
         split.should.have.length(3);
         split.map(s => s.segments.length).should.eql([1,3,0]);
+    });
+
+    it('split rules elevation', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('1km@elevation+2km@elevation');
+        split.should.have.length(2);
+        split.map(s => s.segments.length).should.eql([2,1]);
+        split = route.split('1km@elevation+*');
+        split.should.have.length(2);
+        split.map(s => s.segments.length).should.eql([2,2]);
+        split = route.split('0.5km@elevation+2km@elevation+*');
+        split.should.have.length(3);
+        split.map(s => s.segments.length).should.eql([2,1,1]);
+    });
+
+    it('split rule duration', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('1h+6h');
+        split.should.have.length(2);
+        split.map(s => s.segments.length).should.eql([1,1]);
+    });
+
+    it('split rule mixed', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('5km+4h+0.51km@elevation');
+        split.should.have.length(3);
+        split.map(s => s.segments.length).should.eql([1,1,1]);
     });
 });
