@@ -28,7 +28,9 @@
   },
   "homepage": "https://github.com/stropitek/route-stat#readme",
   "dependencies": {
-    "gpx-parse": "^0.10.4"
+    "gpx-parse": "^0.10.4",
+    "ml-savitzky-golay": "^2.0.3",
+    "npm": "^3.10.5"
   },
   "devDependencies": {
     "mocha": "^2.5.3",

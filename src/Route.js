@@ -1,6 +1,7 @@
 'use strict';
 const parseRule = require('./parseRule');
 const converter = require('./unitConverter');
+const SG = require('ml-savitzky-golay');
 
 class Route {
     constructor(segments, options) {
@@ -17,6 +18,7 @@ class Route {
         this._lengthUnit = options.distanceUnit || 'km';
         this._speedUnit = this._lengthUnit + '/' + this._timeUnit;
         this._paceUnit = this._timeUnit + '/' + this._lengthUnit;
+        this._SG = options.SG;
     }
 
     get distance() {
@@ -255,7 +257,10 @@ class Route {
         this._cumulDistance.unshift(0);
         this._cumulDuration.unshift(0);
         this._cumulElevation.unshift(0);
-
+        if(this._SG) {
+            this._speed = SG(this._speed, 1, this._SG);
+            this._elevationSpeed = SG(this._elevationSpeed, 1, this._SG);
+        }
     }
 
     static fromGpx(gpx) {
