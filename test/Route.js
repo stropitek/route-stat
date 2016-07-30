@@ -43,6 +43,10 @@ describe('route-stat from segments basic tests', function () {
          route = Route.fromSegments(segments);
     });
     it('get all computed properties', function () {
+        route._timeUnit.should.equal('h');
+        route._lengthUnit.should.equal('km');
+        route._speedUnit.should.equal('km/h');
+        route._paceUnit.should.equal('h/km');
         route.distance.should.deepEqual([10,5]);
         route.duration.should.deepEqual([5,3]);
         route.elevation.should.deepEqual([0,1]);
@@ -59,6 +63,10 @@ describe('route-stat from segments basic tests', function () {
 
     it('changes units', function () {
         route.setUnits('m', 's');
+        route._timeUnit.should.equal('s');
+        route._lengthUnit.should.equal('m');
+        route._speedUnit.should.equal('m/s');
+        route._paceUnit.should.equal('s/m');
         route.segments.should.deepEqual([
             {distance: 10000, duration: 5*3600, elevation: 0},
             {distance: 5000, duration: 3 * 3600, elevation: 1000}
@@ -154,9 +162,23 @@ describe('route-stat split', function () {
         split.map(s => s.segments.length).should.eql([1,1,1]);
     });
 
-    it('threshold split rule', function () {
+    it('threshold split rule (speed)', function () {
         var route = Route.fromSegments(segmentsRemainder);
         var split = route.split('*{speed,1.99km/h}');
+        split.should.have.length(3);
+        split.map(s => s.segments.length).should.eql([1,1,2]);
+    });
+
+    it('threshold split rule (elevation speed)', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('*{elevationSpeed,1.99km/h}');
+        split.should.have.length(2);
+        split.map(s => s.segments.length).should.eql([3,1]);
+    });
+
+    it('threshold split rule (pace)', function () {
+        var route = Route.fromSegments(segmentsRemainder);
+        var split = route.split('*{pace,0.51h/km}');
         split.should.have.length(3);
         split.map(s => s.segments.length).should.eql([1,1,2]);
     });

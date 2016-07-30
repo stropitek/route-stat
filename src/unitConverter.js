@@ -6,19 +6,23 @@ const dimensions = ['length', 'time'];
 const base = {
     length: {
         name: 'length',
-        dimension: [1, 0]
+        dimension: [1, 0],
+        baseUnit: 'm'
     },
     time: {
         name: 'time',
-        dimension: [0, 1]
+        dimension: [0, 1],
+        baseUnit: 's'
     },
     speed: {
         name: 'speed',
-        dimension: [1, -1]
+        dimension: [1, -1],
+        baseUnit: 'm/s'
     },
     pace: {
         name: 'pace',
-        dimension: [-1, 1]
+        dimension: [-1, 1],
+        baseUnit: 's/m'
     }
 };
 
@@ -61,6 +65,7 @@ const units= {
         prefixes: prefixes.short
     }
 };
+
 // const units = [
 //     {type: 'distance', name: 'meter', alias: ['m', 'meters'], value: 1},
 //     {type: 'distance', name: 'kilometer', alias: ['km', 'kilometers'], value: 1000},
@@ -117,13 +122,22 @@ function toVal(unit) {
     return result;
 }
 
-function parse(expression) {
+function split(expression) {
     expression = expression.trim();
     var m = expressionReg.exec(expression);
     if(!m) {
         throw new Error('Invalid expression');
     }
-    var units = m[2].split('.');
+    if(!m[1]) m[1] = 1;
+    return {
+        unit: m[2],
+        value: +m[1]
+    }
+}
+
+function parse(expression) {
+    var splitted = split(expression);
+    var units = splitted.unit.split('.');
     for (var i = 0; i < units.length; i++) {
         var unit = units[i];
         units[i] = units[i].split('/');
@@ -147,24 +161,65 @@ function parse(expression) {
     };
 
     for(var i=0; i<div.length; i++) {
-        dim = add(dim, neg(div[i]));
+        dim = addDim(dim, negDim(div[i]));
     }
     for(var i=0; i<mul.length; i++) {
-        dim = add(dim, mul[i]);
+        dim = addDim(dim, mul[i]);
     }
     var base = baseMap[dim.dimension.toString()];
     if(!base) throw new Error('Invalid unit');
 
-    if(!m[1]) m[1] = 1;
-
     return {
         type: base.name,
         dimension: dim.dimension,
-        value: dim.value * (+m[1])
+        value: dim.value * splitted.value
     };
 }
 
-function add(obj1, obj2) {
+function unparse(obj, unit) {
+    if(!unit) unit = getUnitFromDimension(obj.dimension);
+    var parsed = parse(unit);
+    if(!checkDimensions(parsed.dimensions, obj.dimensions)) {
+        throw new Error('Cannot unparse to different dimensions');
+    }
+    return obj.value * parsed.value + unit;
+}
+
+function divide(a, b) {
+    if(Number.isFinite(a)) {
+        if(Number.isFinite(b)) {
+            throw new Error('Two numbers given');
+        }
+        b = parse(b);
+        return toString(a / b.value, negDim(b).dimension);
+    } else {
+        if(Number.isFinite(b)) {
+            a = parse(a);
+            return toString(a.value / b, a.dimension);
+        } else {
+            a = parse(a);
+            b = parse(b);
+            var dim = addDim(a, negDim(b)).dimension;
+            var value = a.value / b.value;
+            return toString(value, dim);
+        }
+    }
+}
+
+function toString(value, dim) {
+    if(!baseMap[dim.toString()]) throw new Error('No base units found');
+    return value + baseMap[dim.toString()].baseUnit;
+}
+
+function checkDimensions(dim1, dim2) {
+    for(var i=0; i<dim1.length; i++) {
+        if(dim1[i] !== dim2[i]) return false;
+    }
+    return true;
+}
+
+
+function addDim(obj1, obj2) {
     var r = Object.assign({}, obj1);
     r.dimension = obj1.dimension.slice();
     for(var i=0; i<r.dimension.length; i++) {
@@ -174,7 +229,7 @@ function add(obj1, obj2) {
     return r;
 }
 
-function neg(obj) {
+function negDim(obj) {
     var r = Object.assign({}, obj);
     r.dimension = obj.dimension.slice();
     for(var i=0; i<r.dimension.length; i++) {
@@ -200,4 +255,4 @@ function check(expression) {
     return true;
 }
 
-module.exports = {convert, getType, parse, check};
+module.exports = {convert, getType, parse, check, divide};

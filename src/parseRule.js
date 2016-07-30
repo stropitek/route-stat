@@ -62,11 +62,20 @@ function parseInterval(element) {
     }
     if (m[5]) {
         var thresholds = m[5].split(',').map(s => s.trim());
+
         if (thresholds.length < 2) throw new Error('Invalid threshold, at least the property name and one value expected');
         var property = thresholds[0];
         thresholds.splice(0, 1);
         if(constant.validThresholdProperties.indexOf(property) < 0) {
             throw new Error('Invalid threshold, threshold property is not valid');
+        }
+
+        if(property.match(/pace/i)) {
+            property = property.replace('pace' , 'speed');
+            property = property.replace('Pace', 'Speed');
+            for(var i = 0; i<thresholds.length; i++) {
+                thresholds[i] = converter.divide(1, thresholds[i]);
+            }
         }
 
         var expectedType = constant.properties[property];

@@ -32,3 +32,11 @@ describe('unit conversion', function () {
         converter.convert('3600s', 'h').should.equal(1);
     });
 });
+
+describe('unit arithmetics', function () {
+    it('divides', function () {
+        converter.divide('72km/h', 2).should.equal('10m/s');
+        converter.divide(1, '0.1m/s').should.equal('10s/m');
+        converter.divide('10km', '100s').should.equal('100m/s');
+    });
+});
