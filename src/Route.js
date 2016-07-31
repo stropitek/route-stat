@@ -2,6 +2,7 @@
 const parseRule = require('./parseRule');
 const converter = require('./unitConverter');
 const SG = require('ml-savitzky-golay');
+const GpxHelper = require('./GpxHelper');
 
 class Route {
     constructor(segments, options) {
@@ -263,8 +264,11 @@ class Route {
         }
     }
 
-    static fromGpx(gpx) {
-        throw new Error('not yet implemented');
+    static fromGpx(gpx, options) {
+        var gpxHelper = new GpxHelper(gpx);
+        return gpxHelper.compute(0,0).then(segments => {
+            return Route.fromSegments(segments, options);
+        });
     }
 
     static fromSegments(segments, options) {
