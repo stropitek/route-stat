@@ -34,59 +34,60 @@ class Route {
         return this.segments.map(segment => segment.elevation);
     }
 
-    get speed() {
-        if (!this._speed)
+    _getComputedProperty(property) {
+        var prop = '_' + property;
+        if(!this[prop]) {
             this._compute();
-        return this._speed;
+        }
+        return this[prop];
+    }
+
+    get speed() {
+        return this._getComputedProperty('speed');
     }
 
     get elevationSpeed() {
-        if (!this._elevationSpeed) {
-            this._compute();
-        }
-        return this._elevationSpeed;
+        return this._getComputedProperty('elevationSpeed');
     }
 
     get meanSpeed() {
-        if (!this._meanSpeed)
-            this._compute();
-        return this._meanSpeed;
+        return this._getComputedProperty('meanSpeed');
     }
 
     get meanPace() {
-        if (!this._meanPace)
-            this._compute();
-        return this._meanPace;
+        return this._getComputedProperty('meanPace');
     }
 
     get totalDuration() {
-        if (!this._totalDuration) this._compute();
-        return this._totalDuration;
+        return this._getComputedProperty('totalDuration');
     }
 
     get totalDistance() {
-        if (!this._totalDistance) this._compute();
-        return this._totalDistance;
+        return this._getComputedProperty('totalDistance');
     }
 
     get totalElevation() {
-        if (!this._totalElevation) this._compute();
-        return this._totalElevation;
+        return this._getComputedProperty('totalElevation');
+    }
+
+    get totalUp() {
+        return this._getComputedProperty('totalUp');
+    }
+
+    get totalDown() {
+        return this._getComputedProperty('totalDown');
     }
 
     get cumulDuration() {
-        if (!this._cumulDuration) this._compute();
-        return this._cumulDuration;
+        return this._getComputedProperty('cumulDuration');
     }
 
     get cumulDistance() {
-        if (!this._cumulDistance) this._compute();
-        return this._cumulDistance;
+        return this._getComputedProperty('cumulDistance');
     }
 
     get cumulElevation() {
-        if (!this._cumulElevation) this._compute();
-        return this._cumulElevation;
+        return this._getComputedProperty('cumulElevation');
     }
 
     split(splitRule) {
@@ -235,6 +236,8 @@ class Route {
         this._totalDistance = 0;
         this._totalDuration = 0;
         this._totalElevation = 0;
+        this._totalUp = 0;
+        this._totalDown = 0;
         this._meanSpeed = 0;
         this._speed = new Array(this.segments.length);
         this._elevationSpeed = new Array(this.segments.length);
@@ -247,6 +250,11 @@ class Route {
             this._totalDuration += segment.duration;
             this._totalDistance += segment.distance;
             this._totalElevation += segment.elevation;
+            if(segment.elevation > 0) {
+                this._totalUp += segment.elevation;
+            } else {
+                this._totalDown += segment.elevation;
+            }
             this._cumulDuration [i] = this._totalDuration;
             this._cumulDistance[i] = this._totalDistance;
             this._cumulElevation[i] = this._totalElevation;
