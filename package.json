@@ -4,7 +4,8 @@
   "description": "Statistics on gps-tracked routes",
   "main": "src/Route.js",
   "scripts": {
-    "test": "mocha --require should --recursive"
+    "test": "mocha --require should --recursive",
+    "build": "browserify --ignore-missing --standalone=RouteStat src/Route.js > dist/RouteStat.js && uglifyjs dist/RouteStat.js > dist/RouteStat.min.js"
   },
   "repository": {
     "type": "git",
@@ -33,8 +34,10 @@
     "npm": "^3.10.5"
   },
   "devDependencies": {
+    "browserify": "^13.1.0",
     "mocha": "^2.5.3",
     "mocha-better-spec-reporter": "^3.0.2",
-    "should": "^10.0.0"
+    "should": "^10.0.0",
+    "uglify-js": "github:mishoo/UglifyJS2#harmony"
   }
 }
