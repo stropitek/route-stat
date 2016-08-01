@@ -115,7 +115,7 @@ function getSegmentData(wayPoints) {
         var t1 = new Date(wayPoints[j + 1].time).getTime() / 1000 / 3600;
         segments[j].duration = t1 - t0;
         segments[j].distance = dist(cart1, cart0) / 1000; // Distance in km
-        segments[j].elevation = wayPoints[j + 1].elevation - wayPoints[j].elevation;
+        segments[j].elevation = (wayPoints[j + 1].elevation - wayPoints[j].elevation) / 1000;
     }
     return segments;
 }
