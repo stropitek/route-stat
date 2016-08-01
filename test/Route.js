@@ -52,7 +52,7 @@ describe('route-stat from segments basic tests', function () {
         route.elevation.should.deepEqual([0,1]);
         route.speed.should.deepEqual([2, 5/3]);
         route.meanSpeed.should.equal((2+5/3)/2);
-        route.meanPace.should.equal(60 / ((2+5/3)/2));
+        route.meanPace.should.equal(1 / ((2+5/3)/2));
         route.cumulDistance.should.deepEqual([0,10,15]);
         route.cumulDuration.should.deepEqual([0,5,8]);
         route.cumulElevation.should.deepEqual([0,0,1]);
@@ -86,7 +86,7 @@ describe('route-stat from segments basic tests', function () {
         route.elevation.should.deepEqual([0,1]);
         route.speed.should.deepEqual([2, 5/3]);
         route.meanSpeed.should.equal((2+5/3)/2);
-        route.meanPace.should.equal(60 / ((2+5/3)/2));
+        route.meanPace.should.equal(1 / ((2+5/3)/2));
         route.cumulDistance.should.deepEqual([0,10,15]);
         route.cumulDuration.should.deepEqual([0,5,8]);
         route.cumulElevation.should.deepEqual([0,0,1]);

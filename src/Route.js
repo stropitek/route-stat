@@ -262,7 +262,7 @@ class Route {
         }
 
         this._meanSpeed = cumSpeed / this.segments.length;
-        this._meanPace = 60 / this._meanSpeed;
+        this._meanPace = 1 / this._meanSpeed;
         this._cumulDistance.unshift(0);
         this._cumulDuration.unshift(0);
         this._cumulElevation.unshift(0);
