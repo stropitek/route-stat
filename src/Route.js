@@ -4,6 +4,12 @@ const converter = require('./unitConverter');
 const SG = require('ml-savitzky-golay');
 const GpxHelper = require('./GpxHelper');
 
+const SGDefault = {
+    windowSize: 31,
+    pad: 'pre',
+    derivative: 0
+};
+
 class Route {
     constructor(segments, options) {
         options = options || {};
@@ -19,7 +25,9 @@ class Route {
         this._lengthUnit = options.distanceUnit || 'km';
         this._speedUnit = this._lengthUnit + '/' + this._timeUnit;
         this._paceUnit = this._timeUnit + '/' + this._lengthUnit;
-        this._SG = options.SG;
+        if(options.SG) {
+            this._SG = Object.assign({}, SGDefault, options.SG);
+        }
     }
 
     get distance() {
