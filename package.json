@@ -5,7 +5,7 @@
   "main": "src/Route.js",
   "scripts": {
     "test": "mocha --require should --recursive",
-    "build": "browserify --ignore-missing --standalone=RouteStat src/Route.js > dist/RouteStat.js && uglifyjs dist/RouteStat.js > dist/RouteStat.min.js"
+    "build": "mkdir -p dist && browserify --ignore-missing --standalone=RouteStat src/Route.js > dist/RouteStat.js && uglifyjs dist/RouteStat.js > dist/RouteStat.min.js"
   },
   "repository": {
     "type": "git",
