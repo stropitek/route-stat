@@ -98,7 +98,10 @@ class Route {
         return this._getComputedProperty('cumulElevation');
     }
 
-    split(splitRule) {
+    split(splitRule, options) {
+        var options = Object.assign({}, options, {
+
+        })
         var that = this;
         var distances = this.cumulDistance;
         var times = this.cumulDuration;
@@ -177,10 +180,7 @@ class Route {
 
         var split = new Array(parts.length);
         for (var i = 0; i < parts.length; i++) {
-            split[i] = Route.fromSegments(this.segments.slice(parts[i].from, parts[i].to), {
-                timeUnit: that._timeUnit,
-                distanceUnit: that._lengthUnit
-            });
+            split[i] = Route.fromSegments(this.segments.slice(parts[i].from, parts[i].to), options);
 
             if (serie[i].thresholds) {
                 var fromTo = [];
@@ -193,7 +193,7 @@ class Route {
                 }
                 var subsplit = new Array(fromTo.length);
                 for (var j = 0; j < fromTo.length; j++) {
-                    subsplit[j] = Route.fromSegments(split[i].segments.slice(fromTo[j].from, fromTo[j].to));
+                    subsplit[j] = Route.fromSegments(split[i].segments.slice(fromTo[j].from, fromTo[j].to), options);
                 }
                 split[i] = subsplit;
             }
