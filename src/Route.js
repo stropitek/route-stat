@@ -10,9 +10,14 @@ const SGDefault = {
     derivative: 0
 };
 
+const defaultOptions = {
+    timeUnit: 'h',
+    distanceUnit: 'km'
+};
+
 class Route {
     constructor(segments, options) {
-        options = options || {};
+        options = Object.assign({}, defaultOptions, options);
         // Make a deep copy
         this.segments = segments.map(segment => {
             return {
@@ -21,8 +26,8 @@ class Route {
                 elevation: segment.elevation
             };
         });
-        this._timeUnit = options.timeUnit || 'h';
-        this._lengthUnit = options.distanceUnit || 'km';
+        this._timeUnit = options.timeUnit;
+        this._lengthUnit = options.distanceUnit;
         this._speedUnit = this._lengthUnit + '/' + this._timeUnit;
         this._paceUnit = this._timeUnit + '/' + this._lengthUnit;
         if(options.SG) {
@@ -203,6 +208,12 @@ class Route {
         return flatten(split);
     }
 
+    getUnits() {
+        return {
+
+        }
+    }
+
     setUnits(distanceUnit, timeUnit) {
         var hasChanged = false, distanceUnitChanged = false, timeUnitChanged = false;
         if (distanceUnit && distanceUnit !== this._lengthUnit) {
@@ -293,6 +304,17 @@ class Route {
 
     static fromRule(rule) {
         throw new Error('not yet implemented');
+    }
+
+    static fromRoutes(routes, options) {
+        // Join several routes into one
+        options = Object.assign({}, defaultOptions, options);
+        var segments = [];
+        for(var i= 0; i<routes.length; i++) {
+            routes[i].setUnits(options.distanceUnit, options.timeUnit);
+            segments = segments.concat(routes[i].segments);
+        }
+        return Route.fromSegments(segments, options);
     }
 }
 
