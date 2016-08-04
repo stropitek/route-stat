@@ -18,7 +18,6 @@ const defaultOptions = {
 class Route {
     constructor(segments, options) {
         options = Object.assign({}, defaultOptions, options);
-        // Make a deep copy
         this.segments = segments.map(segment => {
             return {
                 distance: segment.distance,
@@ -30,9 +29,7 @@ class Route {
         this._lengthUnit = options.distanceUnit;
         this._speedUnit = this._lengthUnit + '/' + this._timeUnit;
         this._paceUnit = this._timeUnit + '/' + this._lengthUnit;
-        if(options.SG) {
-            this._SG = Object.assign({}, SGDefault, options.SG);
-        }
+        this._SG = Object.assign({}, SGDefault, options.smoothing);
     }
 
     get distance() {
@@ -45,6 +42,17 @@ class Route {
 
     get elevation() {
         return this.segments.map(segment => segment.elevation);
+    }
+
+    _getSmoothedProperty(property) {
+        if(!this.speed) {
+            this._compute();
+        }
+        var prop = '_' + property;
+        if(!this[prop]) {
+            this._computeSmoothed();
+        }
+        return this[prop];
     }
 
     _getComputedProperty(property) {
@@ -84,11 +92,19 @@ class Route {
     }
 
     get totalUp() {
-        return this._getComputedProperty('totalUp');
+        return this._getSmoothedProperty('totalUp');
+    }
+
+    get paceSmooth() {
+        return this._getSmoothedProperty('paceSmooth');
+    }
+
+    get elevationPaceSmooth() {
+        return this._getSmoothedProperty('elevationPaceSmooth');
     }
 
     get totalDown() {
-        return this._getComputedProperty('totalDown');
+        return this._getSmoothedProperty('totalDown');
     }
 
     get cumulDuration() {
@@ -101,6 +117,14 @@ class Route {
 
     get cumulElevation() {
         return this._getComputedProperty('cumulElevation');
+    }
+
+    get speedSmooth() {
+        return this._getSmoothedProperty('speedSmooth');
+    }
+
+    get elevationSpeedSmooth() {
+        return this._getSmoothedProperty('elevationSpeedSmooth');
     }
 
     split(splitRule, options) {
@@ -255,8 +279,6 @@ class Route {
         this._totalDistance = 0;
         this._totalDuration = 0;
         this._totalElevation = 0;
-        this._totalUp = 0;
-        this._totalDown = 0;
         this._meanSpeed = 0;
         this._speed = new Array(this.segments.length);
         this._elevationSpeed = new Array(this.segments.length);
@@ -269,11 +291,6 @@ class Route {
             this._totalDuration += segment.duration;
             this._totalDistance += segment.distance;
             this._totalElevation += segment.elevation;
-            if(segment.elevation > 0) {
-                this._totalUp += segment.elevation;
-            } else {
-                this._totalDown += segment.elevation;
-            }
             this._cumulDuration [i] = this._totalDuration;
             this._cumulDistance[i] = this._totalDistance;
             this._cumulElevation[i] = this._totalElevation;
@@ -285,9 +302,28 @@ class Route {
         this._cumulDistance.unshift(0);
         this._cumulDuration.unshift(0);
         this._cumulElevation.unshift(0);
+    }
+
+    _computeSmoothed() {
         if(this._SG) {
-            this._speed = SG(this._speed, 1, this._SG);
-            this._elevationSpeed = SG(this._elevationSpeed, 1, this._SG);
+            this._speedSmooth = SG(this._speed, 1, this._SG);
+            this._elevationSpeedSmooth = SG(this._elevationSpeed, 1, this._SG);
+            this._elevationPaceSmooth = this._elevationSpeedSmooth.map(function(speed) {
+                return 1 / speed;
+            });
+            this._paceSmooth = this._speedSmooth.map(function(speed) {
+                return 1 / speed;
+            });
+        }
+        this._totalUp = 0;
+        this._totalDown = 0;
+
+        for (var i = 0; i < this.segments.length; i++) {
+            if(this._elevationSpeedSmooth[i] > 0) {
+                this._totalUp += this._elevationSpeedSmooth[i];
+            } else {
+                this._totalDown += this._elevationSpeedSmooth[i];
+            }
         }
     }
 

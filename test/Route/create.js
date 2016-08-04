@@ -59,8 +59,6 @@ describe('create routes and set their units', function () {
         route.totalDistance.should.equal(15);
         route.totalDuration.should.equal(8);
         route.totalElevation.should.equal(1);
-        route.totalUp.should.equal(1);
-        route.totalDown.should.equal(0);
     });
 
     it('changes units', function () {
