@@ -45,7 +45,7 @@ class Route {
     }
 
     _getSmoothedProperty(property) {
-        if(!this.speed) {
+        if(!this._cumulDistance) {
             this._compute();
         }
         var prop = '_' + property;
@@ -108,15 +108,18 @@ class Route {
     }
 
     get cumulDuration() {
-        return this._getComputedProperty('cumulDuration');
+        var value = this._getComputedProperty('cumulDuration');
+        return value.slice(1);
     }
 
     get cumulDistance() {
-        return this._getComputedProperty('cumulDistance');
+        var value = this._getComputedProperty('cumulDistance');
+        return value.slice(1);
     }
 
     get cumulElevation() {
-        return this._getComputedProperty('cumulElevation');
+        var value = this._getComputedProperty('cumulElevation');
+        return value.slice(1);
     }
 
     get speedSmooth() {
@@ -128,13 +131,12 @@ class Route {
     }
 
     split(splitRule, options) {
-        var options = Object.assign({}, options, {
-
-        })
+        if(!this._cumulDistance) this._compute();
+        var options = Object.assign({}, options)
         var that = this;
-        var distances = this.cumulDistance;
-        var times = this.cumulDuration;
-        var elevations = this.cumulElevation;
+        var distances = this._cumulDistance;
+        var times = this._cumulDuration;
+        var elevations = this._cumulElevation;
         var remainderD = 0;
         var remainderT = 0;
         var remainderE = 0;
@@ -214,7 +216,8 @@ class Route {
             if (serie[i].thresholds) {
                 var fromTo = [];
                 from = 0;
-                while (from < split[i].cumulDistance.length - 1) {
+                if(!split[i]._cumulDistance) split[i]._compute();
+                while (from < split[i]._cumulDistance.length - 1) {
                     var thresholds = serie[i].thresholds.slice().map(obj => Object.assign({}, obj));
                     var f = from;
                     from = getNextAutoIdx(split[i], thresholds, from);

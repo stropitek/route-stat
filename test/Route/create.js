@@ -55,9 +55,9 @@ describe('create routes and set their units', function () {
         route.speed.should.deepEqual([2, 5/3]);
         route.meanSpeed.should.equal((2+5/3)/2);
         route.meanPace.should.equal(1 / ((2+5/3)/2));
-        route.cumulDistance.should.deepEqual([0,10,15]);
-        route.cumulDuration.should.deepEqual([0,5,8]);
-        route.cumulElevation.should.deepEqual([0,0,1]);
+        route.cumulDistance.should.deepEqual([10,15]);
+        route.cumulDuration.should.deepEqual([5,8]);
+        route.cumulElevation.should.deepEqual([0,1]);
         route.totalDistance.should.equal(15);
         route.totalDuration.should.equal(8);
         route.totalElevation.should.equal(1);
@@ -87,9 +87,9 @@ describe('create routes and set their units', function () {
         route.speed.should.deepEqual([2, 5/3]);
         route.meanSpeed.should.equal((2+5/3)/2);
         route.meanPace.should.equal(1 / ((2+5/3)/2));
-        route.cumulDistance.should.deepEqual([0,10,15]);
-        route.cumulDuration.should.deepEqual([0,5,8]);
-        route.cumulElevation.should.deepEqual([0,0,1]);
+        route.cumulDistance.should.deepEqual([10,15]);
+        route.cumulDuration.should.deepEqual([5,8]);
+        route.cumulElevation.should.deepEqual([0,1]);
         route.totalDistance.should.equal(15);
         route.totalDuration.should.equal(8);
         route.totalElevation.should.equal(1);
