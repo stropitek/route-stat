@@ -1,5 +1,7 @@
 'use strict';
 const Route = require('../..');
+const fs = require('fs');
+const path = require('path');
 
 var segments = [
     {
@@ -96,5 +98,13 @@ describe('create routes and set their units', function () {
     it('create Route from route array (join)', function () {
         var route = Route.fromRoutes([Route.fromSegments(segments), Route.fromSegments(segmentsRemainder)]);
         route.segments.should.deepEqual(segments.concat(segmentsRemainder));
+    });
+
+    it('creates Route from gpx', function () {
+        var gpx = fs.readFileSync(path.join(__dirname, '../data/test.gpx'));
+        return Route.fromGpx(gpx).then(route => {
+            route.latitude.should.have.length(4);
+            route.longitude.should.have.length(4);
+        });
     });
 });

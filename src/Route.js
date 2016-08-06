@@ -330,7 +330,13 @@ class Route {
     static fromGpx(gpx, options) {
         var gpxHelper = new GpxHelper(gpx);
         return gpxHelper.compute(0,0).then(segments => {
-            return Route.fromSegments(segments, options);
+            var route =  Route.fromSegments(segments, options);
+            return gpxHelper.getLatitude(0,0).then(latitude => {
+                route.latitude = latitude;
+            }).then(() => gpxHelper.getLongitude(0,0)).then(longitude => {
+                route.longitude = longitude;
+                return route;
+            })
         });
     }
 

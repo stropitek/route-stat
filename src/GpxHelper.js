@@ -39,6 +39,18 @@ class GpxHelper {
         });
     }
 
+    getLatitude(trackIndex, segmentIndex) {
+        return this._init.then(() => {
+            return getProp(this.gpx, 'lat', trackIndex, segmentIndex);
+        });
+    }
+
+    getLongitude(trackIndex, segmentIndex) {
+        return this._init.then(() => {
+            return getProp(this.gpx, 'lon', trackIndex, segmentIndex);
+        });
+    }
+
     getTracks() {
         return this._init.then(() => this.gpx.tracks);
     }
@@ -59,6 +71,10 @@ class GpxHelper {
             }
 
         });
+    }
+
+    getWaypoints() {
+        return tracks[0].segments[0].way
     }
 
     getSegments(trackIndex) {

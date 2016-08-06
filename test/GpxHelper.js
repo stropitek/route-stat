@@ -36,5 +36,19 @@ describe('load gpx', function () {
         return h.compute(0,0).then(data => {
             data.should.have.length(3);
         })
-    })
+    });
+
+    it('get latitude', function () {
+        var h = new GpxHelper(testGpx);
+        return h.getLatitude(0,0).then(data => {
+            data.should.have.length(4);
+        });
+    });
+
+    it('get longitude', function () {
+        var h = new GpxHelper(testGpx);
+        return h.getLongitude(0,0).then(data => {
+            data.should.have.length(4);
+        });
+    });
 });
